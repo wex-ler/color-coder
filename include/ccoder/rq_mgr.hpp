@@ -7,6 +7,11 @@
 
 namespace ccoder {
     
+    //a request manager to handle messages and to print them
+    //usual workflow is
+    //  instantiate a class
+    //  parse as many messages as you need
+    //  print them when you need
     class rq_mgr {
         private:
             //stores the default color of the console text
@@ -15,10 +20,11 @@ namespace ccoder {
             //stores the console handle
             HANDLE console_handle;
 
-            //store the messages to print
+            //stores the messages to print
+            //deque used because we need fast front popping for printing, and fast back insertion for parsing
             std::deque<std::pair<std::string, std::pair<std::vector<short>, std::vector<short>>>> buffer;
 
-            //store colors
+            //stores the colors
             std::map<std::string, short> colors{
                 {"b", FOREGROUND_BLUE},
                 {"g", FOREGROUND_GREEN},
@@ -30,34 +36,28 @@ namespace ccoder {
             };
 
             //color matching
-            //returns default color if not matched
+            //returns default color if not matched..
+            //..even tough this messes with debugging sometimes it's way less error prone
             short match(std::string); //const
 
-            //set color to default
+            //set the color to default
             void set_default() const;
 
-            //set color to requested
+            //set the color to requested
             void set_requested(short) const;
 
             //print to std output stream, uses set_requested and set_default
             void print(std::string&) const;
 
-            //show contents of buffer
-            //exists purely for debugging purposes
-            void show_buffer() const;
-
         public:
             //default constructor
+            //initializes the handle and sets the default color at the time of calling
             rq_mgr();
 
-            //parse text and prepare it for printing
+            //parse text and prepare it for printing by storing it into buffer
             void parse(std::string);
 
             //print all messages in buffer
             void clear();
-
-            //default destructor
-            //relies on set_default() being called consistently
-            ~rq_mgr();
     };
 }
