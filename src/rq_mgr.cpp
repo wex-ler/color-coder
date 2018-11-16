@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cctype>
 #include <ccoder/rq_mgr.hpp>
 
 //constructors
@@ -47,8 +48,7 @@ void ccoder::rq_mgr::print(std::string& output) const {
 
 inline
 void ccoder::rq_mgr::show_buffer() const {
-    for (auto i = 0; i < this->buffer.size(); ++i)
-        std::cout << "\"" << this->buffer[i].first << "\", color: " << this->buffer[i].second << std::endl;
+
 }
 
 //public methods
@@ -56,20 +56,36 @@ void ccoder::rq_mgr::show_buffer() const {
 void ccoder::rq_mgr::parse(std::string input) {
     std::string::size_type current = 0;
 
-    short last_color = this->default_color;
+    std::vector<short> foreground_colors{this->default_color},
+                       background_colors;
 
     for (auto i = 0; i < input.length(); ++i)
         if (input[i] == '/') {
 
-            if (i - current)
-                this->buffer.push_back({std::string(input.begin() + current, input.begin() + i), last_color});
+            if (i - current) {
+                this->buffer.push_back({std::string(input.begin() + current, input.begin() + i), {foreground_colors, background_colors}});
+
+                foreground_colors.clear();
+                background_colors.clear();
+            }
 
             if (input[i + 1] != '/') {
-                last_color = this->match(std::string(1, input[i + 1]));
+                ++i;
 
-                ++i, ++i;
+                if (foreground_colors.size() || background_colors.size())
+                    foreground_colors.clear(), background_colors.clear();
+
+                while (input[i] != '/' && input[i] != ':')
+                    foreground_colors.push_back(this->match(std::string(1, input[i++])));
+
+                if (input[i] == ':') {
+                    ++i;
+
+                    while (input[i] != '/')
+                        background_colors.push_back(this->match(std::string(1, std::toupper(input[i++]))));
+                }
             } else {
-                last_color = this->default_color;
+                foreground_colors.push_back(this->default_color);
 
                 ++i;
             }
@@ -78,13 +94,23 @@ void ccoder::rq_mgr::parse(std::string input) {
         }
 
     if (*(input.end() - 1) != '/')
-        this->buffer.push_back({std::string(input.begin() + current, input.end()), last_color});    
+        this->buffer.push_back({std::string(input.begin() + current, input.end()), {foreground_colors, background_colors}});    
 }
 
 void ccoder::rq_mgr::clear() {
     while (this->buffer.size()) {
-        this->set_requested(buffer[0].second);
-        this->print(buffer[0].first);
+        short fg = 0,
+              bg = 0;
+
+        for (auto color : this->buffer[0].second.first)
+            fg |= color;
+
+        for (auto color : this->buffer[0].second.second)
+            bg |= color;
+
+        this->set_requested(fg | bg);
+
+        this->print(this->buffer[0].first);
 
         buffer.pop_front();
     }

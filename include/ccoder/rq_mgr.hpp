@@ -1,6 +1,7 @@
 #include <deque>
-#include <string>
 #include <map>
+#include <vector>
+#include <string>
 
 #include <windows.h>
 
@@ -15,7 +16,7 @@ namespace ccoder {
             HANDLE console_handle;
 
             //store the messages to print
-            std::deque<std::pair<std::string, short>> buffer;
+            std::deque<std::pair<std::string, std::pair<std::vector<short>, std::vector<short>>>> buffer;
 
             //store colors
             std::map<std::string, short> colors{
@@ -23,9 +24,9 @@ namespace ccoder {
                 {"g", FOREGROUND_GREEN},
                 {"r", FOREGROUND_RED},
 
-                {"_b", BACKGROUND_BLUE},
-                {"_g", BACKGROUND_GREEN},
-                {"_r", BACKGROUND_RED}
+                {"B", BACKGROUND_BLUE},
+                {"G", BACKGROUND_GREEN},
+                {"R", BACKGROUND_RED}
             };
 
             //color matching
