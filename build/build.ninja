@@ -4,5 +4,5 @@ include_impl = ../src/input_parser.cpp ../src/rq_mgr.cpp
 
 rule compile
     command = g++ $cflags $include_impl $in -I $include_dir -o $out
-    
+
 build test.exe: compile ../src/main.cpp
