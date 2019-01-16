@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ccoder/rq_mgr.hpp>
+#include <ccoder/input_parser.hpp>
 
 //simple tester program
 //enter argument through cmd line or standard input
@@ -11,9 +12,10 @@ int main(int argc, char** argv) {
     else
         in = argv[1];
         
+    ccoder::input_parser ip(in);
 
     ccoder::rq_mgr rq;
-                   rq.parse(in);
+                   rq.parse(ip.clear());
                    rq.clear();
 
     //debug me
